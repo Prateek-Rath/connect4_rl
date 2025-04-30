@@ -3,7 +3,7 @@ import pandas as pd
 from IPython.display import display
 from copy import deepcopy
 
-class connect_x:
+class connect_4:
 
     def __init__(self):
         self.board_height = 6
@@ -15,7 +15,7 @@ class connect_x:
         self.turn = 1
 
     def get_board(self):
-        return deepcopy(self.board)
+        return deepcopy(self.board_state)
     
     def render(self):
         rendered_board_state = self.board_state.copy().astype(str)
@@ -90,4 +90,4 @@ class connect_x:
         self.turn = 1+(self.turn%2)
         return self.board_state.copy(), reward
 
-env = connect_x()
+# env = connect_4()

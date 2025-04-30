@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from connect4env import connect_x
+from connect4env import connect_4
 import matplotlib.pyplot as plt 
 from dqn import DQN
 import random
@@ -20,7 +20,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Assuming that we are on a CUDA machine, this should print a CUDA device:
 # print(device)
 
-env = connect_x()
+env = connect_4()
 BATCH_SIZE = 256
 GAMMA = 0.999
 memory = replayMemory()
@@ -124,7 +124,8 @@ def win_rate_test():
     return sum(win)/100, sum(win_moves_taken_list)/len(win_moves_taken_list)
 
 
-num_episodes = 20000
+num_episodes = 5000
+EPS_DECAY = 600
 # control how lagged is target network by updating every n episodes
 TARGET_UPDATE = 10
 
@@ -196,6 +197,8 @@ plt.title('Playing against random agent')
 plt.xlabel('Episode no.')
 plt.ylabel('Win rate')
 plt.show()
+plt.savefig('./images/win_rate')
+plt.close()
 
 plt.plot(th[:, 0], th[:, 2], c='c')
 win_steps_taken_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 2])] for i in range(len(th) - 19)])
@@ -204,8 +207,10 @@ plt.legend()
 plt.xlabel('Episode no.')
 plt.ylabel('Average steps taken for a win')
 plt.show()
+plt.savefig('./images/avg_steps_to_win')
 plt.close()
 
 
-path = 'DQN_random.pth'
-torch.save(policy_net.state_dict(), path)
+
+path = './models/DQN_random.pth'
+# torch.save(policy_net.state_dict(), path)

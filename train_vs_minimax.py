@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from connect4env import connect_x
+from connect4env import connect_4
 import matplotlib.pyplot as plt 
 from dqn import DQN
 import random
@@ -16,12 +16,12 @@ from itertools import count
 
 
 
-
+EPS_DECAY = 500
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Assuming that we are on a CUDA machine, this should print a CUDA device:
 # print(device)
 
-env = connect_x()
+env = connect_4()
 BATCH_SIZE = 256
 GAMMA = 0.999
 memory = replayMemory()
@@ -139,7 +139,7 @@ my_minimax_player = MiniMaxPlayer()
 
 
 
-num_episodes = 10000
+num_episodes = 2600
 # control how lagged is target network by updating every n episodes
 TARGET_UPDATE = 10
 
@@ -172,7 +172,7 @@ for i in range(num_episodes):
             break
         
         available_actions = env.get_available_actions()
-        _, action_p2 = my_minimax_player.minimax(env.board_state.copy(), 1, 2, 2)
+        _, action_p2 = my_minimax_player.minimax(env.board_state.copy(), 2, 2, 2)
         state_p2_, reward_p2 = env.make_move(action_p2, 'p2')
         
         if env.isDone:
@@ -203,10 +203,12 @@ plt.plot(th[:, 0], th[:, 1], c='c')
 win_rate_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 1])] for i in range(len(th) - 19)])
 plt.plot(win_rate_moving_average[:, 0], win_rate_moving_average[:, 1], c='b', label='moving average of win rate')
 plt.legend()
-plt.title('Playing against random agent')
+plt.title('Playing against minimax agent')
 plt.xlabel('Episode no.')
 plt.ylabel('Win rate')
 plt.show()
+plt.savefig('./images/win_rate_minimax')
+plt.close()
 
 plt.plot(th[:, 0], th[:, 2], c='c')
 win_steps_taken_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 2])] for i in range(len(th) - 19)])
@@ -215,8 +217,9 @@ plt.legend()
 plt.xlabel('Episode no.')
 plt.ylabel('Average steps taken for a win')
 plt.show()
+plt.savefig('./images/avg_win_steps_minimax')
 plt.close()
 
 
-path = 'DQN_minimax.pth'
+path = './models/DQN_minimax_d2.pth'
 torch.save(policy_net.state_dict(), path)
