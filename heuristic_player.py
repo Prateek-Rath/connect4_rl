@@ -203,6 +203,23 @@ class HeuristicPlayer():
         tempboard = self.undo_action(tempboard, action, player)
         return open1
 
+    def get_bad_moves(self, board, player):
+        # if opponent wins immidiately after your move, you suck
+        opponent = 1 + (player%2)
+        bad_moves = []
+        for a in self.get_valid_moves(board):
+            tempboard = deepcopy(board)
+            self.take_action(tempboard, a, player)
+            flag = False
+            for b in self.get_valid_moves(tempboard):
+                if self.check_win(tempboard, opponent, b):
+                    flag = True
+                    break
+            self.undo_action(tempboard, a, player)
+            if flag:
+                bad_moves.append(a)
+        return bad_moves
+    
     def heuristic_player_move(self, board, player):
         """Heuristic player move logic."""
         opponent = 1 + (player%2)
@@ -222,132 +239,153 @@ class HeuristicPlayer():
                 print('doing blocking action')
                 return a
          
-        bad_moves = []
+        bad_moves = self.get_bad_moves(board, player)
+        # if opponent wins after you play a move, that move is a bad move
         
+
         # try to form double trick for yourself
-        
         for a in self.get_valid_moves(board):
             if self.form_double_trick(board, player, a):
-                print('doing x2 action')
-                return a
+                if a not in bad_moves:
+                    print('double trick')
+                    return a
 
         # try to form multiple open 3s for yourself
         
-        most3s_action = None
+        most3s_actions = []
         most3s = 0
         for a in self.get_valid_moves(board):
             # we need the number of open 3s it forms
             if self.open3count(board, player, a) > most3s:
-                most3s_action = a
+                most3s_actions = [a]
                 most3s = self.open3count(board, player, a)
-        if most3s_action is not None:
-            print('doing 3s action')
-            return most3s_action
-        
+            elif self.open3count(board, player, a) == most3s and most3s != 0:
+                most3s_actions.append(a)
+            
+        for a in most3s_actions:
+            if a not in bad_moves:
+                print('doing most 3s action')
+                return a
+    
         
         # try to form multiple open 2s for yourself
         
-        most2s_action = None
+        most2s_actions = []
         most2s = 0
         for a in self.get_valid_moves(board):
             # we need the number of open 3s it forms
             if self.open2count(board, player, a) > most2s:
-                most2s_action = a
+                most2s_actions = [a]
                 most2s = self.open2count(board, player, a)
-        if most2s_action is not None:
-            print('doing 2s action')
-            return most2s_action
+            elif self.open2count(board, player, a) == most2s and most2s != 0:
+                most2s_actions.append(a)
+            
+        for a in most2s_actions:
+            if a not in bad_moves:
+                print('doing most 2s action')
+                return a
         
         # try to form open 1s for yourself
         # this means choose central cells on move 1...
         
-        most1s_action = None
+        most1s_actions = []
         most1s = 0
         for a in self.get_valid_moves(board):
             # we need the number of open 3s it forms
-            if self.open2count(board, player, a) > most2s:
-                most1s_action = a
-                most1s = self.open2count(board, player, a)
-        if most1s_action is not None:
-            print('doing 1s action')
-            return most1s_action
+            if self.open1count(board, player, a) > most1s:
+                most1s_actions = [a]
+                most1s = self.open3count(board, player, a)
+            elif self.open1count(board, player, a) == most1s and most1s != 0:
+                most1s_actions.append(a)
+            
+        for a in most1s_actions:
+            if a not in bad_moves:
+                print('doing most 1s action')
+                return a
+        
+        # avoid a bad move if possible
+        good_moves = [a for a in self.get_valid_moves(board) if a not in bad_moves]
+        if len(good_moves) > 0:
+            print('doing random good move')
+            return random.choice(good_moves)
+
         
         print('doing random action')
         return random.choice(self.get_valid_moves(board))
         
 
-x = np.array(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-    ]
-)
+# x = np.array(
+#     [
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#     ]
+# )
 
-trick2test = np.array(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 2, 0],
-        [0, 0, 0, 1, 1, 1, 0],
-        [0, 0, 1, 2, 1, 2, 0],
-        [0, 0, 2, 2, 2, 2, 0],
-    ]
-)
+# trick2test = np.array(
+#     [
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 2, 0],
+#         [0, 0, 0, 1, 1, 1, 0],
+#         [0, 0, 1, 2, 1, 2, 0],
+#         [0, 0, 2, 2, 2, 2, 0],
+#     ]
+# )
 
-x = np.array(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 2, 0],
-        [0, 0, 0, 1, 1, 1, 0],
-        [2, 0, 1, 2, 1, 2, 0],
-        [2, 0, 2, 1, 2, 2, 0],
-    ]
-)
-
-
-open3test = np.array(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 2, 0],
-        [0, 0, 0, 1, 1, 1, 0],
-        [0, 0, 1, 2, 1, 2, 0],
-        [0, 0, 2, 2, 2, 2, 0],
-    ]
-)
-
-my_heur_player = HeuristicPlayer()
+# x = np.array(
+#     [
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 2, 0],
+#         [0, 0, 0, 1, 1, 1, 0],
+#         [2, 0, 1, 2, 1, 2, 0],
+#         [2, 0, 2, 1, 2, 2, 0],
+#     ]
+# )
 
 
-# y = my_heur_player.take_action(x, 6, 1)
-# y = my_heur_player.undo_action(y, 6, 1)
-# print('a is ', y)
+# open3test = np.array(
+#     [
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 2, 0],
+#         [0, 0, 0, 1, 1, 1, 0],
+#         [0, 0, 1, 2, 1, 2, 0],
+#         [0, 0, 2, 2, 2, 2, 0],
+#     ]
+# )
 
-# win = my_heur_player.check_win(x, 1, 4)
-# print('win is', win)
+# my_heur_player = HeuristicPlayer()
 
 
-# trick2 = my_heur_player.form_double_trick(trick2test, 1, 4)
-# print('trick2 is',  trick2)
+# # y = my_heur_player.take_action(x, 6, 1)
+# # y = my_heur_player.undo_action(y, 6, 1)
+# # print('a is ', y)
 
-# open3 = my_heur_player.open3count(open3test, 1, 4)
-# print('open3 is', open3)
+# # win = my_heur_player.check_win(x, 1, 4)
+# # print('win is', win)
 
-x = np.array(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-    ]
-)
 
-a = my_heur_player.heuristic_player_move(x,1)
-print('a is ', a)
+# # trick2 = my_heur_player.form_double_trick(trick2test, 1, 4)
+# # print('trick2 is',  trick2)
+
+# # open3 = my_heur_player.open3count(open3test, 1, 4)
+# # print('open3 is', open3)
+
+# x = np.array(
+#     [
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#         [0, 0, 0, 0, 0, 0, 0],
+#     ]
+# )
+
+# a = my_heur_player.heuristic_player_move(x,1)
+# print('a is ', a)
