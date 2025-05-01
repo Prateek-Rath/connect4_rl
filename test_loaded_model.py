@@ -11,6 +11,9 @@ from minimax import MiniMaxPlayer
 policy_net = DQN(7)
 policy_net.load_state_dict(torch.load('./models/DQN_random.pth', weights_only=True))
 
+policy_net2 = DQN(7)
+policy_net2.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
+
 x = np.array(
     [[0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0],
@@ -24,7 +27,7 @@ x = np.array(
 my_minimax_player = MiniMaxPlayer() 
 
 
-def select_action(state, available_actions, steps_done=None, training=True):
+def select_action(state, available_actions, steps_done=None, training=True, net=policy_net):
     # batch and color channel
     state = torch.tensor(state, dtype=torch.float, device=device).unsqueeze(dim=0).unsqueeze(dim=0)
     epsilon = random.random()
@@ -37,7 +40,7 @@ def select_action(state, available_actions, steps_done=None, training=True):
     if epsilon > eps_threshold:
         with torch.no_grad():
             # action recommendations from policy net
-            r_actions = policy_net(state)[0, :]
+            r_actions = net(state)[0, :]
             state_action_values = [r_actions[action] for action in available_actions]
             argmax_action = np.argmax(state_action_values)
             greedy_action = available_actions[argmax_action]
@@ -73,8 +76,8 @@ for episode in range(num_episodes):
         # print('player moved')
         
         state = env.get_board()
-        # a2 = random.choice(env.get_available_actions())
-        _, a2 = my_minimax_player.minimax(state, 2, 2, 2)
+        a2 = random.choice(env.get_available_actions())
+        # _, a2 = my_minimax_player.minimax(state, 2, 2, 2)
         # print('a2 is', a2)
         # input()
         state_p2_, reward_p2 = env.make_move(a2, 'p2')
