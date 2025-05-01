@@ -1,4 +1,3 @@
-from minimax import MiniMaxPlayer
 import torch.optim as optim
 import torch
 import torch.nn as nn
@@ -13,14 +12,15 @@ import numpy as np
 from copy import deepcopy
 from memory import replayMemory
 from itertools import count
+from heuristic_player import HeuristicPlayer
 
 
 
-EPS_DECAY = 500
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Assuming that we are on a CUDA machine, this should print a CUDA device:
 # print(device)
-
+my_heur_agent = HeuristicPlayer()
 env = connect_4()
 BATCH_SIZE = 256
 GAMMA = 0.999
@@ -42,6 +42,9 @@ optimizer = optim.Adam(policy_net.parameters())
 
 def select_action(state, available_actions, steps_done=None, training=True):
     # batch and color channel
+    if len(available_actions) == 0:
+        print('no actions available so we will return')
+        return
     state = torch.tensor(state, dtype=torch.float, device=device).unsqueeze(dim=0).unsqueeze(dim=0)
     epsilon = random.random()
     if training:
@@ -120,29 +123,22 @@ def win_rate_test():
 
             available_actions = env.get_available_actions()
             # action = random_agent(available_actions)
-            _, action = my_minimax_player.minimax(env.board_state.copy(), 2, 2, 2)
+            action = my_heur_agent.heuristic_player_move(env.board_state.copy(), 2)
             state, reward = env.make_move(action, 'p2')
+    try:
+        return sum(win)/100, sum(win_moves_taken_list)/len(win_moves_taken_list)
+    except:
+        return 0, 1
 
-    return sum(win)/100, sum(win_moves_taken_list)/len(win_moves_taken_list)
 
-from itertools import count
-
-num_episodes = 20000
+num_episodes = 1000
+EPS_DECAY = 150
 # control how lagged is target network by updating every n episodes
 TARGET_UPDATE = 10
 
-# avoid resetting
 # avoid resetting
 steps_done = 0
 training_history = []
-my_minimax_player = MiniMaxPlayer()
-
-
-
-
-num_episodes = 2600
-# control how lagged is target network by updating every n episodes
-TARGET_UPDATE = 10
 
 for i in range(num_episodes): 
     env.reset()
@@ -162,6 +158,7 @@ for i in range(num_episodes):
         action_p1 = select_action(state_p1, available_actions, steps_done)
         steps_done += 1
         state_p1_, reward_p1 = env.make_move(action_p1, 'p1')
+        # env.check_game_done('p1')
         
         if env.isDone:
             if reward_p1 == 1:
@@ -173,9 +170,11 @@ for i in range(num_episodes):
             break
         
         available_actions = env.get_available_actions()
-        _, action_p2 = my_minimax_player.minimax(env.board_state.copy(), 2, 2, 2)
+        # action_p2 = random_agent(available_actions)
+        action_p2 = my_heur_agent.heuristic_player_move(state_p1_, 2)
         state_p2_, reward_p2 = env.make_move(action_p2, 'p2')
         
+        # env.check_game_done('p2') # already called in make_move
         if env.isDone:
             if reward_p2 == 1:
                 # punish p1 for (random agent) p2's win 
@@ -204,11 +203,11 @@ plt.plot(th[:, 0], th[:, 1], c='c')
 win_rate_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 1])] for i in range(len(th) - 19)])
 plt.plot(win_rate_moving_average[:, 0], win_rate_moving_average[:, 1], c='b', label='moving average of win rate')
 plt.legend()
-plt.title('Playing against minimax agent')
+plt.title('Playing against heurisitic agent')
 plt.xlabel('Episode no.')
 plt.ylabel('Win rate')
 plt.show()
-plt.savefig('./images/win_rate_minimax')
+plt.savefig('./images/win_rate_heuristic')
 plt.close()
 
 plt.plot(th[:, 0], th[:, 2], c='c')
@@ -218,9 +217,10 @@ plt.legend()
 plt.xlabel('Episode no.')
 plt.ylabel('Average steps taken for a win')
 plt.show()
-plt.savefig('./images/avg_win_steps_minimax')
+plt.savefig('./images/avg_steps_to_win_heuristic')
 plt.close()
 
 
-path = './models/DQN_minimax_d2.pth'
-torch.save(policy_net.state_dict(), path)
+
+path = './models/DQN_heuristic.pth'
+# torch.save(policy_net.state_dict(), path)
