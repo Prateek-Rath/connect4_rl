@@ -90,4 +90,4 @@ class connect_4:
         self.turn = 1+(self.turn%2)
         return self.board_state.copy(), reward
 
-# env = connect_4()
+env = connect_4()
