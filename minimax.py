@@ -16,7 +16,7 @@ class MiniMaxPlayer(Player):
         self.ROWS = 6
         self.COLS = 7
         self.CONNECT = 4
-        self.WIN_REWARD = 1000
+        self.WIN_REWARD = 10000
         self.BOTH_OPEN_THREE = 100
         self.SINGLE_OPEN_THREE = 20
         self.BOTH_OPEN_TWO = 40
@@ -29,7 +29,7 @@ class MiniMaxPlayer(Player):
         winner = self.check_winner(state)
         if winner == maximizing_player:
             return (np.iinfo(np.int32).max, None)
-        elif winner == 1-maximizing_player:
+        elif winner == 1+(maximizing_player%2):
             return (np.iinfo(np.int64).min, None)
         elif self.is_draw(state):
               return (0, None)
@@ -59,6 +59,8 @@ class MiniMaxPlayer(Player):
               best_action = random.choice(self.valid_moves(state))
               return (max_eval, best_action)
             elif len(best_actions) == 1:
+            #   print('only the best', best_actions[0])
+            #   print(state)
               return max_eval, best_actions[0]
             
             # print('random action by minimax no worries', best_actions)

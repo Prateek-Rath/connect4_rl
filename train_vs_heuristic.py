@@ -32,7 +32,9 @@ height = env.board_height
 width = env.board_width
 
 policy_net = DQN(n_actions).to(device)
-policy_net.load_state_dict(torch.load("./models/DQN_minimax_d2.pth", weights_only=True))
+# policy_net.load_state_dict(torch.load("./models/DQN_minimax_d2.pth", weights_only=True))
+
+policy_net.load_state_dict(torch.load("./models/DQN_heuristic.pth", weights_only=True))
 # target_net will be updated every n episodes to tell policy_net a better estimate of how far off from convergence
 target_net = DQN(n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())

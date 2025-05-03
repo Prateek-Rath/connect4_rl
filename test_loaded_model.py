@@ -9,7 +9,7 @@ import math
 from minimax import MiniMaxPlayer
 from heuristic_player import HeuristicPlayer
 policy_net = DQN(7)
-policy_net.load_state_dict(torch.load('./models/DQN_heuristic.pth', weights_only=True))
+policy_net.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
 
 policy_net2 = DQN(7)
 policy_net2.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
@@ -79,8 +79,8 @@ for episode in range(num_episodes):
         
         state = env.get_board()
         # a2 = random.choice(env.get_available_actions())
-        a2= my_heur_player.heuristic_player_move(state, 2)
-        # _, a2 = my_minimax_player.minimax(state, 2, 2, 2)
+        # a2= my_heur_player.heuristic_player_move(state, 2)
+        _, a2 = my_minimax_player.minimax(state, 3, 2, 2)
         # print('a2 is', a2)
         # input()
         state_p2_, reward_p2 = env.make_move(a2, 'p2')
