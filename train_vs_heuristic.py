@@ -135,8 +135,8 @@ def win_rate_test():
         return 0, 1
 
 
-num_episodes = 2000
-EPS_DECAY = 150
+num_episodes = 5000
+EPS_DECAY = 700
 # control how lagged is target network by updating every n episodes
 TARGET_UPDATE = 10
 
@@ -150,13 +150,13 @@ for i in range(num_episodes):
     state_p1 = env.board_state.copy()
 
     # record every 20 epochs
-    if i % 20 == 19:
-        win_rate, moves_taken = win_rate_test()
-        training_history.append([i + 1, win_rate, moves_taken])
-        th = np.array(training_history)
-        # print training message every 200 epochs
-        if i % 200 == 199:
-            print('Episode {}: | win_rate: {} | moves_taken: {}'.format(i, th[-1, 1], th[-1, 2]))
+    # if i % 20 == 19:
+    #     win_rate, moves_taken = win_rate_test()
+    #     training_history.append([i + 1, win_rate, moves_taken])
+    #     th = np.array(training_history)
+    #     # print training message every 200 epochs
+    #     if i % 200 == 199:
+    #         print('Episode {}: | win_rate: {} | moves_taken: {}'.format(i, th[-1, 1], th[-1, 2]))
 
     for t in count():
         available_actions = env.get_available_actions()
@@ -206,26 +206,26 @@ print('Complete')
 
 
 
-plt.plot(th[:, 0], th[:, 1], c='c')
-win_rate_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 1])] for i in range(len(th) - 19)])
-plt.plot(win_rate_moving_average[:, 0], win_rate_moving_average[:, 1], c='b', label='moving average of win rate')
-plt.legend()
-plt.title('Playing against heurisitic agent')
-plt.xlabel('Episode no.')
-plt.ylabel('Win rate')
-plt.show()
-plt.savefig('./images/win_rate_heuristic.png')
-plt.close()
+# plt.plot(th[:, 0], th[:, 1], c='c')
+# win_rate_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 1])] for i in range(len(th) - 19)])
+# plt.plot(win_rate_moving_average[:, 0], win_rate_moving_average[:, 1], c='b', label='moving average of win rate')
+# plt.legend()
+# plt.title('Playing against heurisitic agent')
+# plt.xlabel('Episode no.')
+# plt.ylabel('Win rate')
+# plt.show()
+# plt.savefig('./images/win_rate_heuristic.png')
+# plt.close()
 
-plt.plot(th[:, 0], th[:, 2], c='c')
-win_steps_taken_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 2])] for i in range(len(th) - 19)])
-plt.plot(win_steps_taken_moving_average[:, 0], win_steps_taken_moving_average[:, 1], c='b', label='moving average of win steps taken')
-plt.legend()
-plt.xlabel('Episode no.')
-plt.ylabel('Average steps taken for a win')
-plt.show()
-plt.savefig('./images/avg_steps_to_win_heuristic.png')
-plt.close()
+# plt.plot(th[:, 0], th[:, 2], c='c')
+# win_steps_taken_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 2])] for i in range(len(th) - 19)])
+# plt.plot(win_steps_taken_moving_average[:, 0], win_steps_taken_moving_average[:, 1], c='b', label='moving average of win steps taken')
+# plt.legend()
+# plt.xlabel('Episode no.')
+# plt.ylabel('Average steps taken for a win')
+# plt.show()
+# plt.savefig('./images/avg_steps_to_win_heuristic.png')
+# plt.close()
 
 
 
