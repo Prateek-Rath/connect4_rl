@@ -300,7 +300,7 @@ class HeuristicPlayer():
             # we need the number of open 3s it forms
             if self.open1count(board, player, a) > most1s:
                 most1s_actions = [a]
-                most1s = self.open3count(board, player, a)
+                most1s = self.open1count(board, player, a)
             elif self.open1count(board, player, a) == most1s and most1s != 0:
                 most1s_actions.append(a)
             
