@@ -230,24 +230,30 @@ class HeuristicPlayer():
         # check if you yourself have a win
         for a in self.get_valid_moves(board):
             if self.check_win(board, player, a):
-                # print('doing winning action')
+                print('doing winning action')
                 return a
 
         # block opponent's open wins
         for a in self.get_valid_moves(board):
             if self.check_win(board, opponent, a):
-                # print('doing blocking action')
+                print('doing blocking action')
                 return a
          
         bad_moves = self.get_bad_moves(board, player)
         # if opponent wins after you play a move, that move is a bad move
         
+        # block opponent's double tricks
+        for a in self.get_valid_moves(board):
+            if self.form_double_trick(board, opponent, a):
+                print('opp has double trick at ',a)
+                return a
+
 
         # try to form double trick for yourself
         for a in self.get_valid_moves(board):
             if self.form_double_trick(board, player, a):
                 if a not in bad_moves:
-                    # print('double trick')
+                    print('double trick')
                     return a
 
         # try to form multiple open 3s for yourself
@@ -264,7 +270,7 @@ class HeuristicPlayer():
             
         for a in most3s_actions:
             if a not in bad_moves:
-                # print('doing most 3s action')
+                print('doing most 3s action')
                 return a
     
         
@@ -282,7 +288,7 @@ class HeuristicPlayer():
             
         for a in most2s_actions:
             if a not in bad_moves:
-                # print('doing most 2s action')
+                print('doing most 2s action')
                 return a
         
         # try to form open 1s for yourself
@@ -300,17 +306,17 @@ class HeuristicPlayer():
             
         for a in most1s_actions:
             if a not in bad_moves:
-                # print('doing most 1s action')
+                print('doing most 1s action')
                 return a
         
         # avoid a bad move if possible
         good_moves = [a for a in self.get_valid_moves(board) if a not in bad_moves]
         if len(good_moves) > 0:
-            # print('doing random good move')
+            print('doing random good move')
             return random.choice(good_moves)
 
         
-        # print('doing random action')
+        print('doing random action')
         return random.choice(self.get_valid_moves(board))
         
 
@@ -359,7 +365,7 @@ class HeuristicPlayer():
 #     ]
 # )
 
-# my_heur_player = HeuristicPlayer()
+my_heur_player = HeuristicPlayer()
 
 
 # # y = my_heur_player.take_action(x, 6, 1)
@@ -376,16 +382,16 @@ class HeuristicPlayer():
 # # open3 = my_heur_player.open3count(open3test, 1, 4)
 # # print('open3 is', open3)
 
-# x = np.array(
-#     [
-#         [0, 0, 0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0, 0, 0],
-#     ]
-# )
+x = np.array(
+    [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0],
+    ]
+)
 
-# a = my_heur_player.heuristic_player_move(x,1)
-# print('a is ', a)
+a = my_heur_player.heuristic_player_move(x,2)
+print('a is ', a)

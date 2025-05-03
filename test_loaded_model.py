@@ -7,9 +7,9 @@ import random
 from eps_decay import EPS_START, EPS_END, EPS_DECAY
 import math
 from minimax import MiniMaxPlayer
-
+from heuristic_player import HeuristicPlayer
 policy_net = DQN(7)
-policy_net.load_state_dict(torch.load('./models/DQN_random.pth', weights_only=True))
+policy_net.load_state_dict(torch.load('./models/DQN_heuristic.pth', weights_only=True))
 
 policy_net2 = DQN(7)
 policy_net2.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
@@ -25,6 +25,7 @@ x = np.array(
 )
 
 my_minimax_player = MiniMaxPlayer() 
+my_heur_player = HeuristicPlayer()
 
 
 def select_action(state, available_actions, steps_done=None, training=True, net=policy_net):
@@ -54,7 +55,7 @@ env.reset()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-num_episodes = 1000
+num_episodes = 1
 wins=0
 losses = 0
 
@@ -67,27 +68,26 @@ for episode in range(num_episodes):
         with torch.no_grad():
             a1 = select_action(state, env.get_available_actions(), 0, False)
         state_p1_, reward_p1 = env.make_move(a1, 'p1')
-        # env.render()
+        env.render()
 
-        env.check_game_done('p1')
+        # env.check_game_done('p1')
         if env.isDone:
+            wins += 1
             break
 
         # print('player moved')
         
         state = env.get_board()
-        a2 = random.choice(env.get_available_actions())
+        # a2 = random.choice(env.get_available_actions())
+        a2= my_heur_player.heuristic_player_move(state, 2)
         # _, a2 = my_minimax_player.minimax(state, 2, 2, 2)
         # print('a2 is', a2)
         # input()
         state_p2_, reward_p2 = env.make_move(a2, 'p2')
-        # env.render()
+        env.render()
 
-        env.check_game_done('p2')
+        # env.check_game_done('p2')
 
-    if env.check_game_done('p1') == env.reward['win']:
-        wins += 1
-    else:
-        losses += 1
-
+        if env.isDone:
+            losses += 1
 print('win rate is', wins/(wins+losses))

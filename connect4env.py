@@ -69,6 +69,8 @@ class connect_4:
         # check for draw
         elif np.sum([self.board_state == 0]) == 0:
             self.isDone = True
+            print('draw')
+            print('isDone set to true')
             return self.reward['draw']
         else:
             return 0 # not win, not draw

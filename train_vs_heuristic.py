@@ -32,6 +32,7 @@ height = env.board_height
 width = env.board_width
 
 policy_net = DQN(n_actions).to(device)
+policy_net.load_state_dict(torch.load("./models/DQN_minimax_d2.pth", weights_only=True))
 # target_net will be updated every n episodes to tell policy_net a better estimate of how far off from convergence
 target_net = DQN(n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
@@ -44,7 +45,7 @@ def select_action(state, available_actions, steps_done=None, training=True):
     # batch and color channel
     if len(available_actions) == 0:
         print('no actions available so we will return')
-        return
+        return None
     state = torch.tensor(state, dtype=torch.float, device=device).unsqueeze(dim=0).unsqueeze(dim=0)
     epsilon = random.random()
     if training:
@@ -70,6 +71,9 @@ def optimize_model():
     transitions = memory.sample(BATCH_SIZE)
     state_batch, action_batch, reward_batch, next_state_batch = zip(*[(np.expand_dims(m[0], axis=0), \
                                         [m[1]], m[2], np.expand_dims(m[3], axis=0)) for m in transitions])
+    
+    if state_batch is None or action_batch is None or reward_batch is None:
+        return
     # tensor wrapper
     state_batch = torch.tensor(state_batch, dtype=torch.float, device=device)
     action_batch = torch.tensor(action_batch, dtype=torch.long, device=device)
@@ -131,7 +135,7 @@ def win_rate_test():
         return 0, 1
 
 
-num_episodes = 1000
+num_episodes = 2000
 EPS_DECAY = 150
 # control how lagged is target network by updating every n episodes
 TARGET_UPDATE = 10
@@ -141,6 +145,7 @@ steps_done = 0
 training_history = []
 
 for i in range(num_episodes): 
+    print('episode ', i)
     env.reset()
     state_p1 = env.board_state.copy()
 
@@ -166,6 +171,7 @@ for i in range(num_episodes):
                 memory.dump([state_p1, action_p1, 1, None])
             else:
                 # state action value tuple for a draw
+                print('should never get here')
                 memory.dump([state_p1, action_p1, 0.5, None])
             break
         
@@ -181,6 +187,7 @@ for i in range(num_episodes):
                 memory.dump([state_p1, action_p1, -1, None])
             else:
                 # state action value tuple for a draw
+                print('draw => break')
                 memory.dump([state_p1, action_p1, 0.5, None])
             break
         
@@ -207,7 +214,7 @@ plt.title('Playing against heurisitic agent')
 plt.xlabel('Episode no.')
 plt.ylabel('Win rate')
 plt.show()
-plt.savefig('./images/win_rate_heuristic')
+plt.savefig('./images/win_rate_heuristic.png')
 plt.close()
 
 plt.plot(th[:, 0], th[:, 2], c='c')
@@ -217,10 +224,10 @@ plt.legend()
 plt.xlabel('Episode no.')
 plt.ylabel('Average steps taken for a win')
 plt.show()
-plt.savefig('./images/avg_steps_to_win_heuristic')
+plt.savefig('./images/avg_steps_to_win_heuristic.png')
 plt.close()
 
 
 
 path = './models/DQN_heuristic.pth'
-# torch.save(policy_net.state_dict(), path)
+torch.save(policy_net.state_dict(), path)

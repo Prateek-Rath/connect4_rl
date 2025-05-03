@@ -22,6 +22,7 @@ class MiniMaxPlayer(Player):
         self.BOTH_OPEN_TWO = 40
         self.SINGLE_OPEN_TWO = 10
         self.CLOSED = 0
+        self.not_sure = -3
 
    # Returns best score,best action for player
     def minimax(self, state, depth, player, maximizing_player):
@@ -33,7 +34,11 @@ class MiniMaxPlayer(Player):
         elif self.is_draw(state):
               return (0, None)
         elif depth == 0:
+            # print('reached 0 depth in ')
+            # print('evaluation is', self.evaluate(state, player))
+            # print(state)
             return (self.evaluate(state, player), None)
+            # return (self.not_sure, random.choice(self.valid_moves(state)))
     
         if player == maximizing_player:
             max_eval = np.iinfo(np.int64).min
@@ -49,10 +54,16 @@ class MiniMaxPlayer(Player):
                     max_eval = eval_score
                     best_actions.append(col)
             if len(best_actions) == 0:
+            #   print('random action by minimax, hopeless')
+            #   print(state)
               best_action = random.choice(self.valid_moves(state))
               return (max_eval, best_action)
             elif len(best_actions) == 1:
               return max_eval, best_actions[0]
+            
+            # print('random action by minimax no worries', best_actions)
+            # print(state)
+
             return (max_eval, random.choice(best_actions)) # fix here should return a random action
         else:
             min_eval = np.iinfo(np.int32).max
@@ -69,6 +80,7 @@ class MiniMaxPlayer(Player):
                     best_actions.append(col)
             if len(best_actions) == 0:
               best_action = random.choice(self.valid_moves(state))
+            #   print('random action by minimax')
               return (min_eval, best_action)
             elif len(best_actions) == 1:
               return min_eval, best_actions[0]
@@ -131,6 +143,15 @@ class MiniMaxPlayer(Player):
         return None  # No winner found
 
     def evaluate(self, state, player):
+        # simplify
+        # opponent = 1 + (player%2)
+        # if(self.check_winner(state) == player):
+        #     return self.WIN_REWARD
+        # elif (self.check_winner(state) == opponent):
+        #     return -1*self.WIN_REWARD
+        # else:
+        #     return 0
+        #simply end
         return self.score_position(state, player) - self.score_position(state, 1+(player % 2))
 
     def score_position(self, state, player):
@@ -194,6 +215,7 @@ class MiniMaxPlayer(Player):
         # Winning condition: player has 4 in a row in the middle of the window
         if np.count_nonzero(window6[1:5] == player) == 4:
             return self.WIN_REWARD
+        
 
         # Detect open/closed three-in-a-row
         for i in range(1, 3):
