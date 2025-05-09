@@ -18,9 +18,10 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 policy_net = DQN(7).to(device)
-policy_net.load_state_dict(torch.load('./models/DQN_wb__kaggle.pth', weights_only=True, map_location=device))
+policy_net.load_state_dict(torch.load('./models/DQN_wb_kaggle0.3.pth', weights_only=True, map_location=device))
 
-# policy_net.load_state_dict(torch.load('./models/DQN_wb?_kaggle.pth', weights_only=True, map_location=device))
+
+# policy_net.load_state_dict(torch.load('./models/DQN_wb_kaggle5000.pth', weights_only=True, map_location=device))
 
 x = np.array(
     [[0, 0, 0, 0, 0, 0, 0],
@@ -54,8 +55,12 @@ def select_action(state, available_actions, steps_done=None, training=True, net=
             state_action_values = [r_actions[action] for action in available_actions]
             argmax_action = np.argmax(state_action_values)
             greedy_action = available_actions[argmax_action]
+            # print('q values are')
+            # print(state_action_values)
+            # print('so we choose', greedy_action)
             return greedy_action
     else:
+        print('random choice?')
         return random.choice(available_actions)
 
 env = connect_4()
@@ -64,7 +69,7 @@ env.reset()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-num_episodes = 1
+num_episodes = 100
 wins=0
 losses = 0
 
@@ -78,7 +83,7 @@ for episode in range(num_episodes):
             a1 = select_action(state, env.get_available_actions(), 0, False)
             # a1 = random.choice(env.get_available_actions())
         state_p1_, reward_p1 = env.make_move(a1, 'p1')
-        env.render()
+        # env.render()
 
         # env.check_game_done('p1')
         if env.isDone and reward_p1 == env.reward['win']:
@@ -96,7 +101,7 @@ for episode in range(num_episodes):
         # print('a2 is', a2)
         # input()
         state_p2_, reward_p2 = env.make_move(a2, 'p2')
-        env.render()
+        # env.render()
 
         # env.check_game_done('p2')
 
