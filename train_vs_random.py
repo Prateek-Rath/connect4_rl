@@ -214,4 +214,4 @@ plt.close()
 
 
 path = './models/DQN_random.pth'
-# torch.save(policy_net.state_dict(), path)
+torch.save(policy_net.state_dict(), path)
