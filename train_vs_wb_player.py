@@ -12,15 +12,17 @@ import numpy as np
 from copy import deepcopy
 from memory import replayMemory
 from itertools import count
+from minimax import MiniMaxPlayer
+from win_block_player import WinBlockPlayer
 
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Assuming that we are on a CUDA machine, this should print a CUDA device:
 # print(device)
-
+my_wb_agent = WinBlockPlayer()
 env = connect_4()
-BATCH_SIZE = 256 # more stable
+BATCH_SIZE = 256
 GAMMA = 0.999
 memory = replayMemory()
 # get max no. of actions from action space
@@ -30,17 +32,22 @@ height = env.board_height
 width = env.board_width
 
 policy_net = DQN(n_actions).to(device)
+# policy_net.load_state_dict(torch.load("./models/DQN_minimax_d2.pth", weights_only=True))
+
+# policy_net.load_state_dict(torch.load("./models/DQN_heuristic.pth", weights_only=True))
 # target_net will be updated every n episodes to tell policy_net a better estimate of how far off from convergence
 target_net = DQN(n_actions).to(device)
 target_net.load_state_dict(policy_net.state_dict())
 # set target_net in testing mode
 target_net.eval()
 
-lr = 1e-3
-optimizer = optim.Adam(policy_net.parameters(), lr = lr)
+optimizer = optim.Adam(policy_net.parameters(), lr=1e-3)
 
 def select_action(state, available_actions, steps_done=None, training=True):
     # batch and color channel
+    if len(available_actions) == 0:
+        print('no actions available so we will return')
+        return None
     state = torch.tensor(state, dtype=torch.float, device=device).unsqueeze(dim=0).unsqueeze(dim=0)
     epsilon = random.random()
     if training:
@@ -66,6 +73,9 @@ def optimize_model():
     transitions = memory.sample(BATCH_SIZE)
     state_batch, action_batch, reward_batch, next_state_batch = zip(*[(np.expand_dims(m[0], axis=0), \
                                         [m[1]], m[2], np.expand_dims(m[3], axis=0)) for m in transitions])
+    
+    if state_batch is None or action_batch is None or reward_batch is None:
+        return
     # tensor wrapper
     state_batch = torch.tensor(state_batch, dtype=torch.float, device=device)
     action_batch = torch.tensor(action_batch, dtype=torch.long, device=device)
@@ -118,40 +128,45 @@ def win_rate_test():
                 break
 
             available_actions = env.get_available_actions()
-            action = random_agent(available_actions)
+            # action = random_agent(available_actions)
+            action = my_wb_agent.wb_player_move(env.board_state.copy(), 2)
             state, reward = env.make_move(action, 'p2')
+    try:
+        return sum(win)/100, sum(win_moves_taken_list)/len(win_moves_taken_list)
+    except:
+        return 0, 1
 
-    return sum(win)/100, sum(win_moves_taken_list)/len(win_moves_taken_list)
 
-
-num_episodes = 10000
-EPS_DECAY = 3000
+num_episodes = 5000
+EPS_DECAY = 700
 # control how lagged is target network by updating every n episodes
-TARGET_UPDATE = 50
+TARGET_UPDATE = 10
 
 # avoid resetting
 steps_done = 0
 training_history = []
 
 for i in range(num_episodes): 
+    steps_done += 1
+    print('episode ', i)
     env.reset()
     state_p1 = env.board_state.copy()
-    steps_done += 1
 
     # record every 20 epochs
-    if i % 20 == 19:
-        win_rate, moves_taken = win_rate_test()
-        training_history.append([i + 1, win_rate, moves_taken])
-        th = np.array(training_history)
-        # print training message every 200 epochs
-        if i % 200 == 199:
-            print('Episode {}: | win_rate: {} | moves_taken: {}'.format(i, th[-1, 1], th[-1, 2]))
+    # if i % 20 == 19:
+    #     win_rate, moves_taken = win_rate_test()
+    #     training_history.append([i + 1, win_rate, moves_taken])
+    #     th = np.array(training_history)
+    #     # print training message every 200 epochs
+    #     if i % 200 == 199:
+    #         print('Episode {}: | win_rate: {} | moves_taken: {}'.format(i, th[-1, 1], th[-1, 2]))
 
     for t in count():
         available_actions = env.get_available_actions()
         action_p1 = select_action(state_p1, available_actions, steps_done)
-        
+        # steps_done += 1
         state_p1_, reward_p1 = env.make_move(action_p1, 'p1')
+        # env.check_game_done('p1')
         
         if env.isDone:
             if reward_p1 == 1:
@@ -159,19 +174,23 @@ for i in range(num_episodes):
                 memory.dump([state_p1, action_p1, 1, None])
             else:
                 # state action value tuple for a draw
+                print('should never get here')
                 memory.dump([state_p1, action_p1, 0.5, None])
             break
         
         available_actions = env.get_available_actions()
-        action_p2 = random_agent(available_actions)
+        # action_p2 = random_agent(available_actions)
+        action_p2 = my_wb_agent.wb_player_move(state_p1_, 2)
         state_p2_, reward_p2 = env.make_move(action_p2, 'p2')
         
+        # env.check_game_done('p2') # already called in make_move
         if env.isDone:
             if reward_p2 == 1:
                 # punish p1 for (random agent) p2's win 
                 memory.dump([state_p1, action_p1, -1, None])
             else:
                 # state action value tuple for a draw
+                # print('draw => break')
                 memory.dump([state_p1, action_p1, 0.5, None])
             break
         
@@ -190,28 +209,28 @@ print('Complete')
 
 
 
-plt.plot(th[:, 0], th[:, 1], c='c')
-win_rate_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 1])] for i in range(len(th) - 19)])
-plt.plot(win_rate_moving_average[:, 0], win_rate_moving_average[:, 1], c='b', label='moving average of win rate')
-plt.legend()
-plt.title('Playing against random agent')
-plt.xlabel('Episode no.')
-plt.ylabel('Win rate')
-plt.show()
-plt.savefig('./images/win_rate')
-plt.close()
+# plt.plot(th[:, 0], th[:, 1], c='c')
+# win_rate_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 1])] for i in range(len(th) - 19)])
+# plt.plot(win_rate_moving_average[:, 0], win_rate_moving_average[:, 1], c='b', label='moving average of win rate')
+# plt.legend()
+# plt.title('Playing against heurisitic agent')
+# plt.xlabel('Episode no.')
+# plt.ylabel('Win rate')
+# plt.show()
+# plt.savefig('./images/win_rate_heuristic.png')
+# plt.close()
 
-plt.plot(th[:, 0], th[:, 2], c='c')
-win_steps_taken_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 2])] for i in range(len(th) - 19)])
-plt.plot(win_steps_taken_moving_average[:, 0], win_steps_taken_moving_average[:, 1], c='b', label='moving average of win steps taken')
-plt.legend()
-plt.xlabel('Episode no.')
-plt.ylabel('Average steps taken for a win')
-plt.show()
-plt.savefig('./images/avg_steps_to_win')
-plt.close()
+# plt.plot(th[:, 0], th[:, 2], c='c')
+# win_steps_taken_moving_average = np.array([[(i + 19) * 20, np.mean(th[i: i + 20, 2])] for i in range(len(th) - 19)])
+# plt.plot(win_steps_taken_moving_average[:, 0], win_steps_taken_moving_average[:, 1], c='b', label='moving average of win steps taken')
+# plt.legend()
+# plt.xlabel('Episode no.')
+# plt.ylabel('Average steps taken for a win')
+# plt.show()
+# plt.savefig('./images/avg_steps_to_win_heuristic.png')
+# plt.close()
 
 
 
-path = './models/DQN_random.pth'
-# torch.save(policy_net.state_dict(), path)
+path = './models/DQN_wb.pth'
+torch.save(policy_net.state_dict(), path)

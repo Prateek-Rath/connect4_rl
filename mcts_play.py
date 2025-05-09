@@ -3,7 +3,7 @@ from mcts import MCTS
 from connect4env import connect_4
 
 mcts = MCTS()
-
+search_time = 100
 
 def demo():
     state = connect_4()
@@ -15,14 +15,14 @@ def demo():
         player = 'p1'
         pass
     else:
-        mcts.search(30)
+        mcts.search(search_time)
         num_rollouts, run_time = mcts.statistics()
         print("Statistics: ", num_rollouts, "rollouts in", run_time, "seconds")
         move = mcts.best_move()
         player = 'p2'
         print("MCTS chose move: ", move)
 
-        state.make_move(move, player)
+        state.make_move(move, 'p1')
         mcts.move(move)
 
     
@@ -47,14 +47,14 @@ def demo():
 
         print("Thinking...")
 
-        mcts.search(8)
+        mcts.search(search_time)
         num_rollouts, run_time = mcts.statistics()
         print("Statistics: ", num_rollouts, "rollouts in", run_time, "seconds")
         move = mcts.best_move()
 
         print("MCTS chose move: ", move)
 
-        state.make_move(move, 'p2' if player == 'p1' else 'p1')
+        state.make_move(move, 'p1' if player == 'p2' else 'p2')
         mcts.move(move)
 
         state.render()

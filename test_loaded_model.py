@@ -8,11 +8,17 @@ from eps_decay import EPS_START, EPS_END, EPS_DECAY
 import math
 from minimax import MiniMaxPlayer
 from heuristic_player import HeuristicPlayer
-policy_net = DQN(7)
-policy_net.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
+from win_block_player import WinBlockPlayer
 
-policy_net2 = DQN(7)
-policy_net2.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+# policy_net = DQN(7)
+# policy_net.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
+
+
+policy_net = DQN(7).to(device)
+policy_net.load_state_dict(torch.load('./models/DQN_random_kaggle.pth', weights_only=True, map_location=device))
 
 x = np.array(
     [[0, 0, 0, 0, 0, 0, 0],
@@ -26,6 +32,7 @@ x = np.array(
 
 my_minimax_player = MiniMaxPlayer() 
 my_heur_player = HeuristicPlayer()
+my_wb_player = WinBlockPlayer()
 
 
 def select_action(state, available_actions, steps_done=None, training=True, net=policy_net):
@@ -55,7 +62,7 @@ env.reset()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-num_episodes = 1
+num_episodes = 100
 wins=0
 losses = 0
 
@@ -66,9 +73,10 @@ for episode in range(num_episodes):
         # print('agent moved')
         state = env.get_board()
         with torch.no_grad():
-            a1 = select_action(state, env.get_available_actions(), 0, False)
+            # a1 = select_action(state, env.get_available_actions(), 0, False)
+            a1 = random.choice(env.get_available_actions())
         state_p1_, reward_p1 = env.make_move(a1, 'p1')
-        env.render()
+        # env.render()
 
         # env.check_game_done('p1')
         if env.isDone:
@@ -80,14 +88,19 @@ for episode in range(num_episodes):
         state = env.get_board()
         # a2 = random.choice(env.get_available_actions())
         # a2= my_heur_player.heuristic_player_move(state, 2)
-        _, a2 = my_minimax_player.minimax(state, 3, 2, 2)
+        # _, a2 = my_minimax_player.minimax(state, 2, 2, 2)
+        # a2 = my_wb_player.wb_player_move(state, 2)
+        a2 = random.choice(env.get_available_actions())
         # print('a2 is', a2)
         # input()
         state_p2_, reward_p2 = env.make_move(a2, 'p2')
-        env.render()
+        # env.render()
 
         # env.check_game_done('p2')
 
         if env.isDone:
             losses += 1
+
+        state_p1 = state_p2_
+        
 print('win rate is', wins/(wins+losses))

@@ -400,16 +400,17 @@ my_heur_player = HeuristicPlayer()
 # # open3 = my_heur_player.open3count(open3test, 1, 4)
 # # print('open3 is', open3)
 
-x = np.array(
-    [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 2, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0],
-    ]
-)
+if __name__ == "__main__":
+    x = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 2, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0],
+        ]
+    )
 
-a = my_heur_player.heuristic_player_move(x,2)
-print('a is ', a)
+    a = my_heur_player.heuristic_player_move(x,2)
+    print('a is ', a)

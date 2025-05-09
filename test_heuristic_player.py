@@ -27,8 +27,8 @@ while not env.isDone:
 
     env.render()
     state = env.get_board()
-    # b = int(input())
-    b = my_heur_player.heuristic_player_move(state, 2)
+    b = int(input())
+    # b = my_heur_player.heuristic_player_move(state, 2)
     env.make_move(b, 'p2')
 
     env.check_game_done('p2')
