@@ -18,7 +18,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 policy_net = DQN(7).to(device)
-policy_net.load_state_dict(torch.load('./models/DQN_random_kaggle.pth', weights_only=True, map_location=device))
+policy_net.load_state_dict(torch.load('./models/DQN_wb__kaggle.pth', weights_only=True, map_location=device))
 
 # policy_net.load_state_dict(torch.load('./models/DQN_wb?_kaggle.pth', weights_only=True, map_location=device))
 
@@ -64,7 +64,7 @@ env.reset()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-num_episodes = 100
+num_episodes = 1
 wins=0
 losses = 0
 
@@ -78,7 +78,7 @@ for episode in range(num_episodes):
             a1 = select_action(state, env.get_available_actions(), 0, False)
             # a1 = random.choice(env.get_available_actions())
         state_p1_, reward_p1 = env.make_move(a1, 'p1')
-        # env.render()
+        env.render()
 
         # env.check_game_done('p1')
         if env.isDone and reward_p1 == env.reward['win']:
@@ -96,7 +96,7 @@ for episode in range(num_episodes):
         # print('a2 is', a2)
         # input()
         state_p2_, reward_p2 = env.make_move(a2, 'p2')
-        # env.render()
+        env.render()
 
         # env.check_game_done('p2')
 

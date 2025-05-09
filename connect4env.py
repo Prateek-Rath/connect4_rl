@@ -3,6 +3,7 @@ import pandas as pd
 from IPython.display import display
 from copy import deepcopy
 
+
 class connect_4:
 
     def __init__(self):
@@ -47,6 +48,7 @@ class connect_4:
         for i in range(self.board_height):
             if check in np.array_str(self.board_state[i, :]):
                 self.isDone = True
+           
         
         # check left diagonal and right diagonal
         for k in range(0, self.board_height - 4 + 1):
@@ -93,3 +95,4 @@ class connect_4:
         return self.board_state.copy(), reward
 
 env = connect_4()
+
