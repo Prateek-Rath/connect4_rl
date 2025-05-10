@@ -232,13 +232,13 @@ class HeuristicPlayer():
         # check if you yourself have a win
         for a in self.get_valid_moves(board):
             if self.check_win(board, player, a):
-                print('doing winning action')
+                # print('doing winning action')
                 return a
 
         # block opponent's open wins
         for a in self.get_valid_moves(board):
             if self.check_win(board, opponent, a):
-                print('doing blocking action')
+                # print('doing blocking action')
                 return a
 
         bad_moves = self.get_bad_moves(board, player)
@@ -248,7 +248,7 @@ class HeuristicPlayer():
         # block opponent's double tricks
         for a in self.get_valid_moves(board):
             if self.form_double_trick(board, opponent, a) and a not in bad_moves:
-                print('opp has double trick at ',a)
+                # print('opp has double trick at ',a)
                 return a
 
 
@@ -256,7 +256,7 @@ class HeuristicPlayer():
         for a in self.get_valid_moves(board):
             if self.form_double_trick(board, player, a):
                 if a not in bad_moves:
-                    print('double trick for me', a)
+                    # print('double trick for me', a)
                     return a
 
         # if your move leads to a double trick for the opponent it's bad!!
@@ -283,7 +283,7 @@ class HeuristicPlayer():
         most3s_actions = [a for a in most3s_actions if a not in bad_moves]
 
         if most3s > 1 and len(most3s_actions) > 0:
-          print('most3s action')
+        #   print('most3s action')
           return random.choice(most3s_actions)
 
 
@@ -302,10 +302,10 @@ class HeuristicPlayer():
         most2s_actions = [a for a in most2s_actions if a not in bad_moves]
         
         if most2s > most3s and len(most2s_actions) > 0:
-          print('most2s action')
+        #   print('most2s action')
           return random.choice(most2s_actions)
         elif len(most3s_actions) > 0:
-          print('most3s action')
+        #   print('most3s action')
           return random.choice(most3s_actions)
 
         # try to form open 1s for yourself
