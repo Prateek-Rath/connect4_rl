@@ -6,7 +6,7 @@ pip install gymnasium torch matplotlib ipython
 
 
 
-## Here is how you can run the code
+## Here is how you can run the code to see win_rates
 Note that the training was actually done in ipynb notebooks on google colab and kaggle, but we converted to python files for more modularity of code.
 
 
