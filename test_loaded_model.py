@@ -13,12 +13,13 @@ from win_block_player import WinBlockPlayer
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# policy_net = DQN(7)
-# policy_net.load_state_dict(torch.load('./models/DQN_minimax_d2.pth', weights_only=True))
+policy_net = DQN(7).to(device)
+policy_net.load_state_dict(torch.load('./models/DQN_minimaxd1_kaggle.pth', weights_only=True))
 
 
 policy_net = DQN(7).to(device)
 policy_net.load_state_dict(torch.load('./models/DQN_wb_kaggle0.3.pth', weights_only=True, map_location=device))
+
 
 
 # policy_net.load_state_dict(torch.load('./models/DQN_wb_kaggle5000.pth', weights_only=True, map_location=device))
@@ -95,8 +96,9 @@ for episode in range(num_episodes):
         state = env.get_board()
         # a2 = random.choice(env.get_available_actions())
         # a2= my_heur_player.heuristic_player_move(state, 2)
-        # _, a2 = my_minimax_player.minimax(state, 2, 2, 2)
+        # _, a2 = my_minimax_player.minimax(state, 1, 2, 2)
         a2 = my_wb_player.wb_player_move(state, 2)
+        # a2 = int(input())
         # a2 = random.choice(env.get_available_actions())
         # print('a2 is', a2)
         # input()
