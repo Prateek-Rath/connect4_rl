@@ -12,11 +12,11 @@ Note that the training was actually done in ipynb notebooks on google colab and 
 
 # Against win-block player
 ```
-python dynamic_test_model.py --opponent wb
+python dynamic_test_model.py --opponent random
 ```
 # Against random player
 ```
-python dynamic_test_model.py --opponent random
+python dynamic_test_model.py --opponent wb
 ```
 # Against minimax
 ```
@@ -32,17 +32,17 @@ python dynamic_test_model.py --opponent heuristic
 
 # Against win-block player
 ```
-python dynamic_test_model.py --opponent wb
+python dynamic_view_model.py --opponent random
 ```
 # Against random player
 ```
-python dynamic_test_model.py --opponent random
+python dynamic_view_model.py --opponent wb
 ```
 # Against minimax
 ```
-python dynamic_test_model.py --opponent minimax
+python dynamic_view_model.py --opponent minimax
 ```
 # Against heuristic player
 ```
-python dynamic_test_model.py --opponent heuristic
+python dynamic_view_model.py --opponent heuristic
 ```
