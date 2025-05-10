@@ -20,7 +20,7 @@ policy_net.load_state_dict(torch.load('./models/DQN_minimaxd1_kaggle.pth', weigh
 policy_net = DQN(7).to(device)
 policy_net.load_state_dict(torch.load('./models/DQN_wb_kaggle0.3.pth', weights_only=True, map_location=device))
 
-# policy_net.load_state_dict(torch.load('./models/DQN_hard_fit_heur.pth', weights_only=True, map_location=device))
+policy_net.load_state_dict(torch.load('./models/DQN_wb_home.pth', weights_only=True, map_location=device))
 
 
 
