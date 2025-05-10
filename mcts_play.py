@@ -1,10 +1,16 @@
 # mcts demo
 from mcts import MCTS
 from connect4env import connect_4
+import random
 
 mcts = MCTS()
-search_time = 100
+search_time = 8
 
+mcts.search(search_time)
+
+
+wins = 0
+losses = 0
 def demo():
     state = connect_4()
     print('do you want to play first')
@@ -30,11 +36,12 @@ def demo():
         print("Current state:")
         state.render()
 
-        user_move = int(input("Enter a move: "))
-        while user_move not in state.get_available_actions():
-            print("Illegal move")
-            user_move = int(input("Enter a move: "))
-        print('user_move is', user_move)
+        # user_move = int(input("Enter a move: "))
+        # while user_move not in state.get_available_actions():
+        #     print("Illegal move")
+        #     user_move = int(input("Enter a move: "))
+        # print('user_move is', user_move)
+        user_move  = random.choice(state.get_available_actions())
         state.make_move(user_move, player)
         mcts.move(user_move)
 

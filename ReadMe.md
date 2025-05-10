@@ -4,10 +4,10 @@
 pip install gymnasium torch matplotlib ipython
 ```
 
-You can run either the notebook's last cell or look below
-The report contains all the explaination.
+
 
 ## Here is how you can run the code
+Note that the training was actually done in ipynb notebooks on google colab and kaggle, but we converted to python files for more modularity of code.
 
 
 # Against win-block player
