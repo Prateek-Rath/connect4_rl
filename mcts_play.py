@@ -13,24 +13,23 @@ wins = 0
 losses = 0
 def demo():
     state = connect_4()
-    print('do you want to play first')
-    x = input()
+    # print('do you want to play first')
+    # x = input()
+    x = 'n'
     mcts = MCTS(state)
     player = None
-    if x == 'y':
-        player = 'p1'
-        pass
-    else:
-        mcts.search(search_time)
-        num_rollouts, run_time = mcts.statistics()
-        print("Statistics: ", num_rollouts, "rollouts in", run_time, "seconds")
-        move = mcts.best_move()
-        player = 'p2'
-        print("MCTS chose move: ", move)
+    player = 'p1'
+    mcts.search(search_time)
+    num_rollouts, run_time = mcts.statistics()
+    print("Statistics: ", num_rollouts, "rollouts in", run_time, "seconds")
+    move = mcts.best_move()
 
-        state.make_move(move, 'p1')
-        mcts.move(move)
+    print("MCTS chose move: ", move)
 
+    state.make_move(move, 'p1' if player == 'p2' else 'p2')
+    mcts.move(move)
+
+    state.render()
     
     while not state.isDone:
         print("Current state:")
@@ -46,8 +45,6 @@ def demo():
         mcts.move(user_move)
 
         state.render()
-        state.check_game_done('p1')
-        state.check_game_done('p2')
         if state.isDone:
             print("Player one won!")
             break
@@ -65,8 +62,6 @@ def demo():
         mcts.move(move)
 
         state.render()
-        state.check_game_done('p1')
-        state.check_game_done('p2')
         if state.isDone:
             print("Player two won!")
             break
