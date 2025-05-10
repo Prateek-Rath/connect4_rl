@@ -2,11 +2,15 @@
 from mcts import MCTS
 from connect4env import connect_4
 import random
+from win_block_player import WinBlockPlayer
+from heuristic_player import HeuristicPlayer
 
 mcts = MCTS()
 search_time = 8
 
 mcts.search(search_time)
+
+my_wb_player = WinBlockPlayer()
 
 
 wins = 0
@@ -41,12 +45,13 @@ def demo():
         #     user_move = int(input("Enter a move: "))
         # print('user_move is', user_move)
         user_move  = random.choice(state.get_available_actions())
+        # user_move = my_wb_player.wb_player_move(state.board_state.copy(), 2)
         state.make_move(user_move, player)
         mcts.move(user_move)
 
         state.render()
         if state.isDone:
-            print("Player one won!")
+            print("Player two won!")
             break
 
         print("Thinking...")
@@ -63,7 +68,7 @@ def demo():
 
         state.render()
         if state.isDone:
-            print("Player two won!")
+            print("Player one won!")
             break
 
 
